@@ -1,36 +1,40 @@
-from db import Database
-from models import ApacheLog
 import configparser
 import re
 from datetime import datetime
-from sqlalchemy.exc import OperationalError
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import text
 
-
+from db import Database
+from models import ApacheLog
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 db = Database(config['Database'])
 
-ApacheLog.__table__.create(db.engine, checkfirst=True)
-
-session = db.Session()
-log_file_path = config['App']['log_dir'] + '/' + config['App']['log_file_mask']
-with open(log_file_path, 'r') as file:
-    logs = file.readlines()
-
-log_pattern = re.compile(
-    r'^(?P<ip_address>[^\s]+) - - \[(?P<request_dtime>[^\]]+)\] "(?P<request_method>[^\s]+) '
-    r'(?P<requested_url>[^\s]+) [^\"]+" (?P<status_code>\d+) (?P<response_size>\d+)')
-
-for line in logs:
-    match = log_pattern.match(line)
+def parse_log_line(log_line):
+    pattern = r'^(?P<ip_address>\S+) \S+ \S+ \[(?P<timestamp>[^\]]+)\] "(?P<request>[^"]+)" (?P<status_code>\d+) (?P<response_size>\d+|-)$'
+    match = re.match(pattern, log_line)
     if match:
-        log_data = match.groupdict()
-        log_data['request_dtime'] = datetime.strptime(log_data['request_dtime'], '%d/%b/%Y:%H:%M:%S %z')
-        log_entry = ApacheLog(**log_data)
-        session.add(log_entry)
+        ip_address = match.group('ip_address')
+        timestamp = match.group('timestamp')
+        request = match.group('request')
+        status_code = int(match.group('status_code'))
+        response_size = int(match.group('response_size')) if match.group('response_size') != '-' else None
 
-session.commit()
-session.close()
+        try:
+            request_time = datetime.strptime(timestamp, '%d/%b/%Y:%H:%M:%S %z')
+            return ip_address, request_time, request, status_code, response_size
+        except ValueError:
+            return None
+
+    return None
+
+def parse_apache_logs(log_file_path):
+    with open(log_file_path, 'r') as file:
+        for line in file:
+            log_data = parse_log_line(line)
+            if log_data:
+                db.create_log_entry(*log_data)
+
+if __name__ == '__main__':
+    ApacheLog.__table__.create(db.engine, checkfirst=True)
+    log_file_path = config['App']['log_dir'] + '/' + config['App']['log_file_mask']
+    parse_apache_logs(log_file_path)
