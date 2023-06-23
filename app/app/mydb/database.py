@@ -1,24 +1,61 @@
 from datetime import date, datetime
-from get_dformat import set_date_format
-from models import ApacheLog, Base
-from sqlalchemy import create_engine, func
-from sqlalchemy.orm import sessionmaker
 
+
+import app.app.utils
+from app.app.mydb.models import ApacheLog, Base, User
+from sqlalchemy import create_engine, func
+from sqlalchemy.exc import DatabaseError
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy_utils import create_database, database_exists
 
 
 class Database:
     def __init__(self, config):
         self.config = config
+        self.create_db = eval(self.config['create_db_if_not_exist'])
         self.engine = create_engine(
-            f"mysql+mysqlconnector://{config['username']}:{config['password']}@{config['host']}:{config['port']}/{config['database']}",
+            f"mysql+mysqlconnector://{self.config['username']}:{self.config['password']}@{self.config['host']}:{self.config['port']}/{self.config['database']}",
             pool_pre_ping=True,
         )
+        if self.create_db:
+            self.create_database()
+
         self.Session = sessionmaker(bind=self.engine)
-        self.date_format = set_date_format(config['dateformat'])
+        self.date_format = app.utils.set_date_format(config['dateformat'])
+        try:
+            Base.metadata.create_all(self.engine, checkfirst=True)
+        except DatabaseError as e:
+            if str(e).startswith("(mysql.connector.errors.DatabaseError) 2003 (HY000)"):
+                print("Ошибка подключения к базе данных. Проверьте данные подключения и работу службы MYSQL")
 
-        Base.metadata.create_all(self.engine, checkfirst=True)
+    def create_database(self):
+        if not database_exists(self.engine.url):
+            create_database(self.engine.url)
+        else:
+            self.engine.connect()
 
-    
+
+    def check_username_existence(self, username):
+        session = self.Session()
+        query = session.query(User).filter(User.username == username)
+        user = query.first()
+        session.close()
+        return user is not None
+   
+    def check_credentials(self, username, password):
+        session = self.Session()
+        query = session.query(User).filter(User.username == username, User.password == password)
+        user = query.first()
+        session.close()
+        return user is not None
+
+    def create_user(self, v_username, v_password):
+        session = self.Session()
+        user = User(username=v_username, password=v_password)
+        session.add(user)
+        session.commit()
+        session.close()
+
 
     def create_log_entry(self, v_ip_address, v_remote_logname, v_remote_user, v_request_time, v_request_method, v_requested_url, v_status_code, v_response_size):
         session = self.Session()
@@ -102,3 +139,4 @@ class Database:
         }
         for log_entry in log_entries
     ]
+

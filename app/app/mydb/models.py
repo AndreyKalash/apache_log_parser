@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, BigInteger
+from sqlalchemy import BigInteger, Column, DateTime, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -10,7 +10,7 @@ class ApacheLog(Base):
     ip_address = Column(String(15), nullable=True)
     remote_logname = Column(String(255), nullable=True)
     remote_user = Column(String(255), nullable=True)
-    requested_url = Column(String(255), nullable=True)
+    requested_url = Column(String(1000), nullable=True)
     request_dtime = Column(DateTime, nullable=True)
     request_method = Column(String(10), nullable=True)
     status_code = Column(Integer, nullable=True)
@@ -27,3 +27,17 @@ class ApacheLog(Base):
                f"remote_user={self.remote_user}, requested_url={self.requested_url}, " \
                f"request_dtime={self.request_dtime}, request_method={self.request_method}, " \
                f"status_code={self.status_code}, response_size={self.response_size})"
+    
+
+class User(Base):
+    __tablename__ = 'user'
+
+    id = Column(Integer, primary_key=True)
+    username = Column(String(255), nullable=False, unique=True)
+    password = Column(String(255), nullable=False)
+
+    def __repr__(self):
+        return f"User(id={self.id}, username={self.username}, password={'*'*len(self.password)})"
+    
+    def __str__(self):
+        return f"User(id={self.id}, username={self.username}, password={'*'*len(self.password)})"
