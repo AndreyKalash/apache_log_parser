@@ -4,11 +4,11 @@ from datetime import datetime
 from tkinter import END, Menu, Text, Tk, ttk
 from tkinter.messagebox import askyesno, showerror, showwarning
 
-import app.app.gui.auth_page as ap
-from app.app.api import app
-from app.app.gui.config_page import ConfigApp
-from app.app.log_parser import parse_apache_logs
-from app.app.utils import Logger, db_connect, read_config, set_date_format
+import apache_log_parser.app.gui.auth_page as ap
+from apache_log_parser.app.api import app
+from apache_log_parser.app.gui.config_page import ConfigApp
+from apache_log_parser.app.log_parser import parse_apache_logs
+from apache_log_parser.app.utils import Logger, db_connect, read_config, set_date_format
 
 
 class MainApp:
@@ -125,8 +125,7 @@ class MainApp:
 
 
     def parse_logs(self):
-        log_file_path = self.config['App']['log_dir'] + '/' + self.config['App']['log_file_mask']
-        self.logger.message(f'Конфигурационный файл: {log_file_path}')
+        log_file_path = self.config['App']['log_dir'] + '\\' + self.config['App']['log_file_mask']
         parse_apache_logs(log_file_path)
 
 

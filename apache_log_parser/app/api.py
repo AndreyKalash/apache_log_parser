@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, request
-
-from app.app.utils import db_connect
+try:
+    from apache_log_parser.app.utils import db_connect
+except:
+    from utils import db_connect
 
 
 db = db_connect()

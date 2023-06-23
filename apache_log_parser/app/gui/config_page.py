@@ -2,7 +2,7 @@ import tkinter as tk
 from configparser import ConfigParser, Error
 from tkinter import messagebox, ttk
 
-from app.app.utils import Logger
+from apache_log_parser.app.utils import Logger
 
 
 class ConfigApp:
@@ -51,6 +51,7 @@ class ConfigApp:
             
             messagebox.showinfo('Успех', 'Конфигурационный файл успешно сохранен')
             self.logger.message('Конфигурационный файл успешно сохранен')
+            messagebox.showwarning('Изменения.', 'Чтобы изменения вступили в силу, перезагрузите приложение')
             self.root.title("Агрегатор Apache - Config. Сохранено")
         except Error as e:
             messagebox.showerror('Ошибка', f"Неверная запись. Конфигурационный файл должен быть типа 'переменная = значение'")
@@ -68,6 +69,8 @@ class ConfigApp:
         if config_content != current_content:
             result = messagebox.askquestion('Изменения не сохранены', 'Изменения не сохранены. Хотите сохранить перед выходом?',
                                             icon='warning')
+            messagebox.showwarning('Изменения.', 'Чтобы изменения вступили в силу, перезагрузите приложение')
+            
             
             if result == 'yes':
                 self.save_config()

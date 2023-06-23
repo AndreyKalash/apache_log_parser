@@ -1,8 +1,16 @@
 from datetime import date, datetime
 
+try:
+    import apache_log_parser.app.utils as utils
+    from apache_log_parser.app.mydb.models import ApacheLog, Base, User
+except:
+    try:
+        import utils
+        from mydb.models import ApacheLog, Base, User
+    except:
+        import app.utils as utils
+        from app.mydb.models import ApacheLog, Base, User
 
-import app.app.utils
-from app.app.mydb.models import ApacheLog, Base, User
 from sqlalchemy import create_engine, func
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import sessionmaker
@@ -21,7 +29,7 @@ class Database:
             self.create_database()
 
         self.Session = sessionmaker(bind=self.engine)
-        self.date_format = app.utils.set_date_format(config['dateformat'])
+        self.date_format = utils.set_date_format(config['dateformat'])
         try:
             Base.metadata.create_all(self.engine, checkfirst=True)
         except DatabaseError as e:

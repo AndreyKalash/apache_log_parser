@@ -2,7 +2,7 @@ import datetime
 import subprocess
 import os
 
-from app.app.utils import read_config
+from app.utils import read_config
 
 def add_to_taskmngr():
     config = read_config()
@@ -22,10 +22,16 @@ $trigger = New-ScheduledTaskTrigger -Daily -At "{time}"
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
 Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings
     '''
-    with open(script_file, 'w') as f:
-        f.write(powershell_script)
 
-    subprocess.run(["powershell.exe", "-Command", f"{main_dir_path + '/' + script_file}"])
+    try:
+        with open(script_file, 'w') as f:
+            f.write(powershell_script)
+        path_ps_file = main_dir_path + "\\" + script_file
+        subprocess.run(["powershell.exe", "-Command", f"{path_ps_file}"])
+        os.remove(path_ps_file)
+    except:
+        print(path_ps_file, 'Проверьте правильность написания имени, а также наличие и правильность пути, после чего повторите попытку.')
+    
 
     
 add_to_taskmngr()

@@ -1,7 +1,12 @@
 import configparser
 from datetime import datetime
-
-from app.app.mydb import database
+try:
+    from apache_log_parser.app.mydb import database
+except:
+    try:
+        from mydb import database
+    except:
+        from app.mydb import database
 
 
 class Logger:        

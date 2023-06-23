@@ -2,8 +2,8 @@ import re
 import tkinter as tk
 from tkinter import messagebox, ttk
 
-from app.app.gui.main_page import MainApp
-from app.app.utils import db_connect
+from apache_log_parser.app.gui.main_page import MainApp
+from apache_log_parser.app.utils import db_connect
 
 
 class AuthApp:
