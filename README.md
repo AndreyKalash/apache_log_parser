@@ -49,6 +49,6 @@
 - ```win_schedule``` = Время для автозапуска парсера для планировцика задач windows. По умолчанию - ```10:30```
 - ```task_name``` = Название задачи. По умолчаниию - ```apache_parser``` 
 - ```script_file``` = Название файла создания задачи для windows. По умолчанию - ```start_pars.ps1```
-- ```main_dir_path``` = ```Путь до папки apache_log_parser``` ````your\path\..\apache_log_parser```
+- ```main_dir_path``` = ```Путь до папки apache_log_parser``` ```your\path\..\apache_log_parser```
 
   
