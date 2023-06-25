@@ -19,14 +19,14 @@ def get_logs():
 def get_logs_by_ip():
     with app.app_context():
         log_entries = db.get_log_entries_by_ip()
-        logs = [{'ip_address': str(log[0]), 'count': log[1]} for log in log_entries]
+        logs = [{'ip_address': str(list(log.values())[0]), 'count': list(log.values())[1]} for log in log_entries]
         return jsonify(logs)
 
 @app.route('/api/logs/date', methods=['GET'])
 def get_logs_by_date():
     with app.app_context():
         log_entries = db.get_log_entries_by_date()
-        logs = [{'date': str(log[0]), 'count': log[1]} for log in log_entries]
+        logs = [{'date': str(list(log.values())[0]), 'count': list(log.values())[1]} for log in log_entries]
         return jsonify(logs)
 
 @app.route('/api/logs/date_range', methods=['GET'])
